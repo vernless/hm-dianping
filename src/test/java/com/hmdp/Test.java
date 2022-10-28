@@ -1,5 +1,15 @@
 package com.hmdp;
 
+import cn.hutool.json.JSONUtil;
+import com.hmdp.dto.Result;
+import com.hmdp.entity.Shop;
+import com.hmdp.entity.ShopType;
+import com.hmdp.service.IShopTypeService;
+import com.hmdp.utils.RedisConstants;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import javax.annotation.Resource;
 import java.util.*;
 
 /**
@@ -8,8 +18,12 @@ import java.util.*;
  * @Description: TODO
  * @Version 1.0
  */
+@SpringBootTest
 public class Test {
-
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private IShopTypeService typeService;
     /*public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         int n = sc.nextInt();
