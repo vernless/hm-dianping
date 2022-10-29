@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -51,7 +52,9 @@ public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> i
         for(ShopType shopType : shopTypes){
             stringRedisTemplate.opsForList().rightPush(key,shopType.getSort().toString());
             stringRedisTemplate.opsForValue().set(typekey + shopType.getSort(), JSONUtil.toJsonStr(shopType));
+            stringRedisTemplate.expire(typekey + shopType.getSort(),RedisConstants.CACHE_SHOP_TTL, TimeUnit.MINUTES);
         }
+        stringRedisTemplate.expire(key,RedisConstants.CACHE_SHOP_TTL, TimeUnit.MINUTES);
         //6. 返回
         return Result.ok(shopTypes);
     }
