@@ -4,11 +4,9 @@ import cn.hutool.json.JSONUtil;
 import com.hmdp.dto.Result;
 import com.hmdp.entity.ShopType;
 import com.hmdp.mapper.ShopTypeMapper;
-import com.hmdp.service.IShopService;
 import com.hmdp.service.IShopTypeService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.utils.RedisConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -51,8 +49,7 @@ public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> i
         //5. 把list写入redis
         for(ShopType shopType : shopTypes){
             stringRedisTemplate.opsForList().rightPush(key,shopType.getSort().toString());
-            stringRedisTemplate.opsForValue().set(typekey + shopType.getSort(), JSONUtil.toJsonStr(shopType));
-            stringRedisTemplate.expire(typekey + shopType.getSort(),RedisConstants.CACHE_SHOP_TTL, TimeUnit.MINUTES);
+            stringRedisTemplate.opsForValue().set(typekey + shopType.getSort(), JSONUtil.toJsonStr(shopType),RedisConstants.CACHE_SHOP_TTL, TimeUnit.MINUTES);
         }
         stringRedisTemplate.expire(key,RedisConstants.CACHE_SHOP_TTL, TimeUnit.MINUTES);
         //6. 返回
