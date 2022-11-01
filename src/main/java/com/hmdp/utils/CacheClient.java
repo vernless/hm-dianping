@@ -72,7 +72,7 @@ public class CacheClient {
         return r;
     }
 
-    // 逻辑时间过期解决缓存击穿
+    // 逻辑时间过期解决缓存击穿:这种要自己手动添加进入Redis，即热点业务
     public <R,ID> R queryWithLogicalExpire(String keyPrefix, ID id, Class<R> classType, Function<ID, R> dbFallback, Long time, TimeUnit unit) {
         String key = keyPrefix + id;
         //1. 从redis中查找缓存

@@ -6,11 +6,15 @@ import com.hmdp.entity.Shop;
 import com.hmdp.entity.ShopType;
 import com.hmdp.service.IShopTypeService;
 import com.hmdp.utils.RedisConstants;
+import com.hmdp.utils.RedisWorker;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @Author 滨
@@ -22,6 +26,7 @@ import java.util.*;
 public class Test {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
     @Resource
     private IShopTypeService typeService;
     /*public static void main(String[] args) {
@@ -50,64 +55,28 @@ public class Test {
         System.out.println(result);
     }*/
 
-    public static void main(String[] args) {
-        Scanner sc= new Scanner(System.in);
-        int n = sc.nextInt();
-        int k = sc.nextInt();
-        int mid = n / 2;
-        int[] level = new int[n];
-        for(int i = 0; i < n; i++){
-            level[i] = sc.nextInt();
-        }
-        if(n == 1){
-            System.out.println(level[0] + k);
-        }else{
-            Arrays.sort(level);
-            System.out.println(level[mid]);
-            loop:
-            while(k > 0){
-                //应该给中位数及往后的武器升级
-                //每次都要从mid开始，加到和mid+1相等为止
-                while(level[mid] + 1 <= level[mid + 1]){
-                    level[mid] += 1;
-                    k--;
-                    if(k == 0){
-                        break loop;
-                    }
-                }
-                System.out.println(level[mid]);
-                int big = mid + 1;
-                for(int i = big; i < n; i++){
-                    if(level[i] > level[mid]){
-                        System.out.println("big:    "+big);
-                        big = i - 1;
-                        break;
-                    }
-                }
+    @Resource
+    private RedisWorker redisWorker;
 
-                for(int i = big; i >= mid; i--){
-                    level[i] += 1;
-                    k--;
-                    if(k == 0){
-                        break loop;
-                    }
-                }
+    private ExecutorService es = Executors.newFixedThreadPool(500);
+
+    @org.junit.jupiter.api.Test
+    void testRedisWorker() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(300);
+        Runnable task = () -> {
+            for(int i = 0; i < 100; i++){
+                long id = redisWorker.nextId("order");
+                System.out.println("id = " + id);
             }
-        }
-        System.out.println("result:"+level[mid]);
-        //1：强化的数量增多
-        //2: 在1的前提下强化的中位数变最大
-        // 1 2 3 4 5 7 7 9 10 12 15    5
-        //         6
-        //         7
-        //         7 7 8
-        //         7 8 8
+            latch.countDown();
+        };
+        long begin = System.currentTimeMillis();
 
-        // 1 2 3 4 5 7 8 9 10 12 15    5
-        //           8
-        //           8  9
-        //           9  9
-        //           9  9  10
-        //           9  10  10
+        for(int i = 0; i < 300; i++){
+            es.submit(task);
+        }
+        latch.await();
+        long end = System.currentTimeMillis();
+        System.out.println("耗时：" + (end - begin));
     }
 }
