@@ -1,4 +1,4 @@
-package com.hmdp;
+package com.hmdp.test;
 
 import cn.hutool.json.JSONUtil;
 import com.hmdp.dto.Result;
